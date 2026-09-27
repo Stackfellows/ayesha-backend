@@ -57,7 +57,7 @@ router.get('/stats', async (req, res) => {
     const totalOrders = orders.length;
     
     // Unique customers based on email
-    const uniqueEmails = new Set(orders.map(o => o.customer.email));
+    const uniqueEmails = new Set(orders.map(o => o.customer?.email).filter(Boolean));
     const activeCustomers = uniqueEmails.size;
     
     // Recent activities (last 5 orders)
@@ -81,17 +81,19 @@ router.get('/customers', async (req, res) => {
     const customersMap = {};
 
     orders.forEach(order => {
-      const email = order.customer.email;
+      const email = order.customer?.email;
+      if (!email) return; // Skip invalid orders
+      
       if (!customersMap[email]) {
         customersMap[email] = {
-          name: `${order.customer.firstName} ${order.customer.lastName}`,
+          name: `${order.customer?.firstName || 'Guest'} ${order.customer?.lastName || ''}`,
           email: email,
           orders: 0,
           spent: 0
         };
       }
       customersMap[email].orders += 1;
-      customersMap[email].spent += order.totalAmount;
+      customersMap[email].spent += (order.totalAmount || 0);
     });
 
     const customersArray = Object.values(customersMap).sort((a, b) => b.spent - a.spent);

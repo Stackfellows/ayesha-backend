@@ -16,7 +16,7 @@ router.get('/', async (req, res) => {
 // Create a product
 router.post('/', upload.array('images', 5), async (req, res) => {
   try {
-    const { name, description, price, category, stock, isNewItem, isBestseller } = req.body;
+    const { name, description, price, category, stock, discount, isNewItem, isBestseller } = req.body;
     const imageUrls = req.files ? req.files.map(file => file.path) : [];
 
     const newProduct = new Product({
@@ -26,6 +26,7 @@ router.post('/', upload.array('images', 5), async (req, res) => {
       category,
       images: imageUrls,
       stock,
+      discount: discount || 0,
       isNewItem: isNewItem === 'true',
       isBestseller: isBestseller === 'true',
     });
@@ -40,7 +41,7 @@ router.post('/', upload.array('images', 5), async (req, res) => {
 // Update a product
 router.put('/:id', upload.array('images', 5), async (req, res) => {
   try {
-    const { name, description, price, category, stock, isNewItem, isBestseller } = req.body;
+    const { name, description, price, category, stock, discount, isNewItem, isBestseller } = req.body;
     const product = await Product.findById(req.params.id);
     
     if (!product) return res.status(404).json({ message: 'Product not found' });
@@ -50,6 +51,7 @@ router.put('/:id', upload.array('images', 5), async (req, res) => {
     product.price = price || product.price;
     product.category = category || product.category;
     product.stock = stock || product.stock;
+    product.discount = discount || product.discount;
     product.isNewItem = isNewItem === 'true';
     product.isBestseller = isBestseller === 'true';
 
